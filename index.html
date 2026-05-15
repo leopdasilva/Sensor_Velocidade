@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velocímetro ESP32-S3</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="shortcut icon" href="images/velocimetro.png" type="image/x-icon">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="images/motoca.png" alt="Logo Motoca" class="logo-moto">
+            <h1 class="xandao-titulo"><img src="images/IFood_logo.svg.png" alt="Logo IFood"> do Xandão</h1>
+            <span id="status" class="status-online">Aguardando ESP32...</span>
+        </header>
+
+        <div class="painel">
+            <div class="velocimetro-aro">
+                <div class="leitura">
+                    <span id="vel">0</span>
+                    <label>km/h</label>
+                </div>
+            </div>
+            
+            <div class="info-adicional">
+                <div class="card">
+                    <small>Odômetro</small>
+                    <p><span id="odo">0.0</span> km</p>
+                </div>
+                <div class="card">
+                    <small>Bateria</small>
+                    <p><span id="bat">100</span>%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/server.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+-- Criar o banco de dados
+CREATE DATABASE IF NOT EXISTS projeto_esp32;
+
+-- Selecionar o banco
+USE projeto_esp32;
+
+-- Criar a tabela para armazenar os dados da ESP32
+CREATE TABLE IF NOT EXISTS dados_sensor (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    velocidade FLOAT NOT NULL,
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,0 +1,100 @@
+#include <Arduino.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+// --- CONFIGURAÇÕES DE CONEXÃO ---
+const char* ssid     = "A25L";      
+const char* password = "samsumg2512";             
+
+const char* serverName = "http://10.210.192"; 
+
+// --- PINAGEM E VARIÁVEIS DO SENSOR ---
+#define HALL_SENSOR_PIN 4
+
+volatile unsigned long lastPulseTime = 0;
+volatile unsigned long pulseInterval = 0;
+
+float wheelDiameter = 0.60; 
+float wheelCircumference;
+float speedKmh = 0;
+
+void IRAM_ATTR detectMagnet() {
+  unsigned long currentTime = micros();
+  if (currentTime - lastPulseTime > 5000) {
+    pulseInterval = currentTime - lastPulseTime;
+    lastPulseTime = currentTime;
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  
+  pinMode(HALL_SENSOR_PIN, INPUT_PULLUP);
+  wheelCircumference = wheelDiameter * 3.14159;
+  
+  attachInterrupt(digitalPinToInterrupt(HALL_SENSOR_PIN), detectMagnet, FALLING);
+
+  Serial.print("Conectando ao Wi-Fi: ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\n[SISTEMA] Wi-Fi Conectado!");
+  Serial.print("[SISTEMA] IP da ESP32: ");
+  Serial.println(WiFi.localIP());
+}
+
+void loop() {
+  unsigned long interval;
+  unsigned long lastTime;
+
+  noInterrupts();
+  interval = pulseInterval;
+  lastTime = lastPulseTime;
+  interrupts();
+
+  unsigned long timeSinceLastPulse = micros() - lastTime;
+
+  if (timeSinceLastPulse > 2000000) { 
+    speedKmh = 0;
+  } else if (interval > 0) {
+    float pulsesPerSecond = 1000000.0 / (float)interval;
+    speedKmh = wheelCircumference * pulsesPerSecond * 3.6;
+  }
+
+  // --- ENVIO DOS DADOS ---
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    
+    // Inicia a requisição na URL completa (IP:Porta/Rota)
+    http.begin(serverName);
+    http.addHeader("Content-Type", "application/json");
+
+    // Monta o JSON (ex: {"velocidade": 12.50})
+    String jsonPayload = "{\"velocidade\":" + String(speedKmh, 2) + "}";
+    
+    int httpResponseCode = http.POST(jsonPayload);
+
+    if (httpResponseCode > 0) {
+      if (httpResponseCode == 200 || httpResponseCode == 201) {
+        Serial.printf("[SUCESSO] Enviado: %.2f km/h | Status: %d\n", speedKmh, httpResponseCode);
+      } else {
+        // Se retornar 404 ou 405 aqui, verifique se o servidor Node ainda está rodando
+        Serial.printf("[ERRO] Erro do Servidor: %d\n", httpResponseCode);
+      }
+    } else {
+      Serial.print("[ERRO] Falha de conexão: ");
+      Serial.println(http.errorToString(httpResponseCode).c_str());
+    }
+
+    http.end(); 
+  } else {
+    Serial.println("[ERRO] Wi-Fi desconectado!");
+    WiFi.begin(ssid, password);
+  }
+
+  delay(2000); 
+}
