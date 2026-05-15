@@ -6,7 +6,7 @@
 const char* ssid     = "A25L";      
 const char* password = "samsumg2512";             
 
-const char* serverName = "http://10.210.192"; 
+const char* serverName = "http://10.19.176.39:3000/api/velocidade"; 
 
 // --- PINAGEM E VARIÁVEIS DO SENSOR ---
 #define HALL_SENSOR_PIN 4

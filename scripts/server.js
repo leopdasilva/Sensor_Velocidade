@@ -9,8 +9,8 @@ app.use(bodyParser.json());
 const db = mysql.createPool({
     host: 'localhost',
     user: 'root',      // Usuário padrão do XAMPP/Wamp é root
-    password: '',      // Senha do seu banco
-    database: 'projeto_esp32'
+    password: 'alexcom34',      // Senha do seu banco
+    database: 'sesi_projeto'
 });
 
 // 2. Rota que a ESP32 vai chamar
