@@ -33,6 +33,24 @@ app.post('/api/velocidade', (req, res) => {
     });
 });
 
+//3 . Rota para o HTML buscar a última velocidade registrada
+app.get('/api/ultima-velocidade', (req, res) => {
+    const sql = "SELECT velocidade FROM dados_sensor ORDER BY id DESC LIMIT 1";
+    
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Erro ao buscar velocidade:", err);
+            return res.status(500).send("Erro no servidor.");
+        }
+        
+        if (results.length > 0) {
+            res.json({ velocidade: results[0].velocidade });
+        } else {
+            res.json({ velocidade: 0 }); // Se o banco estiver vazio
+        }
+    });
+});
+
 // Inicia o servidor na porta 3000
 app.listen(3000, '0.0.0.0', () => {
     console.log("Servidor rodando em: http://localhost:3000");
